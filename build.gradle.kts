@@ -15,10 +15,10 @@ kotlinDslPluginOptions {
   experimentalWarning.set(false)
 }
 gradlePlugin {
-//  plugins {
-//    create("gitonium") {
-//      id = "org.metaborg.gitonium"
-//      implementationClass = "mb.gitonium.GitoniumPlugin"
-//    }
-//  }
+  plugins {
+    create("spoofax-langspec") {
+      id = "org.metaborg.spoofax.gradle.langspec"
+      implementationClass = "mb.spoofax.gradle.plugin.SpoofaxLangSpecPlugin"
+    }
+  }
 }

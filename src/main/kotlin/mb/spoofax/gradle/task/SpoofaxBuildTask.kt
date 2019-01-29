@@ -1,4 +1,4 @@
-package mb.spoofax.gradle
+package mb.spoofax.gradle.task
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -13,8 +13,12 @@ import org.metaborg.core.language.*
 import org.metaborg.core.messages.MessageSeverity
 import org.metaborg.core.project.IProject
 import org.metaborg.core.resource.*
+import org.metaborg.spoofax.core.Spoofax
 import org.metaborg.spoofax.core.build.ISpoofaxBuilder
 import java.io.File
+
+fun TaskContainer.registerSpoofaxBuildTask(spoofaxProject: IProject, spoofax: Spoofax, name: String = "spoofaxBuild") =
+  register(name, SpoofaxBuildTask::class.java, spoofaxProject, spoofax.resourceService, spoofax.dependencyService, spoofax.languagePathService, spoofax.builder)
 
 open class SpoofaxBuildTask(
   private val spoofaxProject: IProject,
@@ -85,11 +89,8 @@ open class SpoofaxBuildTask(
 
   @TaskAction
   fun execute(inputs: IncrementalTaskInputs) {
-    if(!inputs.isIncremental) {
-      inputBuilder.addIdentifiedSources(spoofaxSourceFiles)
-      for(outputDir in outputDirs) {
-        project.delete(outputDir)
-      }
+    val incremental = if(!inputs.isIncremental) {
+      false
     } else {
       val changes = mutableListOf<ResourceChange>()
       inputs.outOfDate {
@@ -100,21 +101,28 @@ open class SpoofaxBuildTask(
         }
       }
       // Do not reorder: removed MUST BE CALLED AFTER outOfDate.
-      var hasDeletion = false
-      inputs.removed {
-        when {
-          isRemoved -> hasDeletion = true
+      val hasDeletion = run {
+        var hasDeletion = false
+        inputs.removed {
+          when {
+            isRemoved -> hasDeletion = true
+          }
         }
+        hasDeletion
       }
-
       if(hasDeletion) {
         // Give up on incrementality, since Spoofax languages typically do not handle deletion well.
-        inputBuilder.addIdentifiedSources(spoofaxSourceFiles)
-        for(outputDir in outputDirs) {
-          project.delete(outputDir)
-        }
+        false
       } else {
         inputBuilder.addSourceChanges(changes)
+        true
+      }
+    }
+
+    if(!incremental) {
+      inputBuilder.addIdentifiedSources(spoofaxSourceFiles)
+      for(outputDir in outputDirs) {
+        project.delete(outputDir.listFiles())
       }
     }
 
