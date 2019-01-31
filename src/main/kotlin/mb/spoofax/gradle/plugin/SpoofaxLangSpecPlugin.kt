@@ -90,7 +90,7 @@ class SpoofaxLangSpecPlugin : Plugin<Project> {
     }
     javaApiConfig.dependencies.add(project.dependencies.create("org.metaborg", "org.metaborg.spoofax.core", extension.metaborgVersion))
 
-    // TODO: support setting configuration (group, id, version, dependencies) in Gradle, to support project dependencies.
+    // TODO: support setting configuration (group, id, version, metaborgversion, dependencies) in Gradle, to support project dependencies.
     // TODO: extend SpoofaxLanguageSpecConfigService and override toConfig to inject
 
 
