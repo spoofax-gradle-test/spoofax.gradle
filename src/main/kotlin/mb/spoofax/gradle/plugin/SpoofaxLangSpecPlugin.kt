@@ -1,20 +1,25 @@
 package mb.spoofax.gradle.plugin
 
 import mb.spoofax.gradle.task.*
+import mb.spoofax.gradle.util.*
 import org.gradle.api.*
-import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.PublishArtifact
 import org.gradle.api.plugins.*
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.kotlin.dsl.*
-import org.metaborg.core.language.LanguageIdentifier
+import org.metaborg.core.language.LanguageVersion
 import org.metaborg.core.project.ISimpleProjectService
 import org.metaborg.spoofax.core.Spoofax
 import org.metaborg.spoofax.meta.core.SpoofaxMeta
 import org.metaborg.spoofax.meta.core.build.LanguageSpecBuildInput
 
+@Suppress("unused")
 class SpoofaxLangSpecPlugin : Plugin<Project> {
+  companion object {
+    const val spoofaxLanguageExtension = "spoofax-language"
+  }
+
   override fun apply(project: Project) {
     val extension = SpoofaxExtension()
     project.extensions.add("spoofax", extension)
@@ -22,9 +27,9 @@ class SpoofaxLangSpecPlugin : Plugin<Project> {
   }
 
   private fun configure(project: Project, extension: SpoofaxExtension) {
-    val spoofaxLanguageExtension = "spoofax-language"
+    // Apply Java plugin.
     project.pluginManager.apply(JavaLibraryPlugin::class)
-
+    val javaApiConfig = project.configurations.getByName(JavaPlugin.API_CONFIGURATION_NAME)
 
     // Create configurations.
     val compileLanguageConfig = project.configurations.create("compileLanguage") {
@@ -51,47 +56,62 @@ class SpoofaxLangSpecPlugin : Plugin<Project> {
     // Create Spoofax and SpoofaxMeta instance.
     val spoofax = Spoofax()
     val resourceSrv = spoofax.resourceService
-    val spoofaxMeta = SpoofaxMeta(spoofax)
+    val spoofaxMeta = SpoofaxMeta(spoofax, SpoofaxGradleMetaModule())
 
-    // Load Spoofax language specification project
+    // Get project location
     val projectDir = project.projectDir
+    val projectLoc = resourceSrv.resolve(projectDir)
+
+    // Override Spoofax language specification configuration from Gradle build script.
+    val configService = spoofaxMeta.injector.getInstance(SpoofaxGradleLanguageSpecConfigService::class.java)
+    val configOverride = run {
+      val groupId = project.group.toString()
+      val id = project.name
+      val version = LanguageVersion.parse(project.version.toString())
+      val metaborgVersion = extension.metaborgVersion
+      val compileDeps = compileLanguageConfig.dependencies.map { it.toSpoofaxDependency() }
+      val sourceDeps = sourceLanguageConfig.dependencies.map { it.toSpoofaxDependency() }
+      val javaDeps = javaApiConfig.allDependencies.map { it.toSpoofaxDependency() }
+      ConfigOverride(groupId, id, version, metaborgVersion, compileDeps, sourceDeps, javaDeps)
+    }
+    configService.addOverride(projectLoc, configOverride)
+
+    // Create Spoofax language specification project.
     val projectService = spoofax.projectService as ISimpleProjectService
-    val spoofaxProject = projectService.create(resourceSrv.resolve(projectDir))
+    val spoofaxProject = projectService.create(projectLoc)
     val langSpecProject = spoofaxMeta.languageSpecService.get(spoofaxProject)
       ?: throw GradleException("Project at $projectDir is not a Spoofax language specification project")
 
-
-    // Read metaborg.yaml configuration.
+    // Read Spoofax language specification configuration.
     val config = langSpecProject.config()
-    // Group
     project.group = config.identifier().groupId
-    // Name
     if(project.name != config.identifier().id) {
       throw GradleException("Project name ${project.name} is not equal to language ID ${config.identifier().id} from metaborg.yaml")
     }
-    // Version
-    project.version = config.identifier().version.toString()
-    // Dependencies
-    fun LanguageIdentifier.toDependency(configuration: String? = null, classifier: String? = null, ext: String? = null): ExternalModuleDependency {
-      return project.dependencies.create(this.groupId, this.id, this.version.toString(), configuration, classifier, ext)
+    // Set project version only if it it has not been set yet.
+    if(project.version == Project.DEFAULT_VERSION) {
+      project.version = config.identifier().version.toString()
     }
-    for(langId in config.compileDeps()) {
-      val dep = langId.toDependency(languageConfig.name, null, spoofaxLanguageExtension)
-      compileLanguageConfig.dependencies.add(dep)
+    // Add dependencies to corresponding dependency configurations when they are empty.
+    if(compileLanguageConfig.dependencies.isEmpty()) {
+      for(langId in config.compileDeps()) {
+        val dep = langId.toGradleDependency(project, languageConfig.name, null, spoofaxLanguageExtension)
+        compileLanguageConfig.dependencies.add(dep)
+      }
     }
-    for(langId in config.sourceDeps()) {
-      val dep = langId.toDependency(languageConfig.name, null, spoofaxLanguageExtension)
-      sourceLanguageConfig.dependencies.add(dep)
+    if(sourceLanguageConfig.dependencies.isEmpty()) {
+      for(langId in config.sourceDeps()) {
+        val dep = langId.toGradleDependency(project, languageConfig.name, null, spoofaxLanguageExtension)
+        sourceLanguageConfig.dependencies.add(dep)
+      }
     }
-    val javaApiConfig = project.configurations.getByName(JavaPlugin.API_CONFIGURATION_NAME)
-    for(id in config.javaDeps()) {
-      val dep = id.toDependency()
-      javaApiConfig.dependencies.add(dep)
+    if(javaApiConfig.allDependencies.isEmpty()) {
+      for(id in config.javaDeps()) {
+        val dep = id.toGradleDependency(project)
+        javaApiConfig.dependencies.add(dep)
+      }
+      javaApiConfig.dependencies.add(project.dependencies.create("org.metaborg", "org.metaborg.spoofax.core", extension.metaborgVersion))
     }
-    javaApiConfig.dependencies.add(project.dependencies.create("org.metaborg", "org.metaborg.spoofax.core", extension.metaborgVersion))
-
-    // TODO: support setting configuration (group, id, version, metaborgversion, dependencies) in Gradle, to support project dependencies.
-    // TODO: extend SpoofaxLanguageSpecConfigService and override toConfig to inject
 
 
     // Shared tasks.
@@ -224,6 +244,7 @@ class SpoofaxLangSpecPlugin : Plugin<Project> {
   }
 }
 
+@Suppress("unused")
 open class SpoofaxExtension {
   var metaborgVersion: String = "2.5.1"
   var createPublication: Boolean = true

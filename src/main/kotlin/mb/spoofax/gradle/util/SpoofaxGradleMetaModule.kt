@@ -1,4 +1,4 @@
-package mb.spoofax.gradle
+package mb.spoofax.gradle.util
 
 import com.google.inject.Singleton
 import org.metaborg.meta.core.config.*

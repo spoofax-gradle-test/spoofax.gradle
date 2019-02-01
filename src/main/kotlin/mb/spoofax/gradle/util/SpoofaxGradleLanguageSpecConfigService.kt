@@ -1,4 +1,4 @@
-package mb.spoofax.gradle
+package mb.spoofax.gradle.util
 
 import org.apache.commons.configuration2.HierarchicalConfiguration
 import org.apache.commons.configuration2.tree.ImmutableNode
@@ -7,7 +7,6 @@ import org.metaborg.core.config.*
 import org.metaborg.core.language.LanguageIdentifier
 import org.metaborg.core.language.LanguageVersion
 import org.metaborg.core.messages.MessageBuilder
-import org.metaborg.meta.core.config.LanguageSpecConfig
 import org.metaborg.spoofax.core.config.SpoofaxProjectConfig
 import org.metaborg.spoofax.meta.core.config.*
 import javax.inject.Inject
@@ -18,7 +17,8 @@ class SpoofaxGradleLanguageSpecConfigService @Inject constructor(
 ) : SpoofaxLanguageSpecConfigService(configReaderWriter, configBuilder) {
   private val overrides = mutableMapOf<FileObject, ConfigOverride>()
 
-  fun addOverride(configFile: FileObject, override: ConfigOverride) {
+  fun addOverride(projectLoc: FileObject, override: ConfigOverride) {
+    val configFile = getConfigFile(projectLoc)
     overrides[configFile] = override
   }
 
@@ -63,7 +63,7 @@ data class ConfigOverride(
   val id: String? = null,
   val version: LanguageVersion? = null,
   val metaborgVersion: String? = null,
-  val compileDeps: MutableCollection<LanguageIdentifier> = mutableListOf(),
-  val sourceDeps: MutableCollection<LanguageIdentifier> = mutableListOf(),
-  val javaDeps: MutableCollection<LanguageIdentifier> = mutableListOf()
+  val compileDeps: Collection<LanguageIdentifier> = mutableListOf(),
+  val sourceDeps: Collection<LanguageIdentifier> = mutableListOf(),
+  val javaDeps: Collection<LanguageIdentifier> = mutableListOf()
 )
