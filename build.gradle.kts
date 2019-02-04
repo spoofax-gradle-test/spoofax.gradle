@@ -9,6 +9,10 @@ plugins {
 
 dependencies {
   compile("org.metaborg:org.metaborg.spoofax.meta.core:2.5.1")
+
+  testCompile("org.junit.jupiter:junit-jupiter-api:5.3.1")
+  testCompile("io.github.glytching:junit-extensions:2.3.0")
+  testRuntime("org.junit.jupiter:junit-jupiter-engine:5.3.1")
 }
 
 kotlinDslPluginOptions {
@@ -21,4 +25,8 @@ gradlePlugin {
       implementationClass = "mb.spoofax.gradle.plugin.SpoofaxLangSpecPlugin"
     }
   }
+}
+
+tasks.withType<Test> {
+  useJUnitPlatform {}
 }

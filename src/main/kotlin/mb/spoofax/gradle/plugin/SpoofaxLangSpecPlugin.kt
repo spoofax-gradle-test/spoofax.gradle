@@ -179,7 +179,10 @@ class SpoofaxLangSpecPlugin : Plugin<Project> {
     cleanTask.dependsOn(langSpecCleanTask)
 
 
-    // Test tasks.
+    // TODO: build examples tasks.
+
+
+    // TODO: SPT test tasks.
 //    val spoofaxTestTask = project.tasks.register("spoofaxTest") {
 //      dependsOn(loadLanguagesTask)
 //      // TODO: inputs
