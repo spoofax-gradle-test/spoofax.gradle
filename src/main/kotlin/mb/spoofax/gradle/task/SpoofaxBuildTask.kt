@@ -16,11 +16,12 @@ import org.metaborg.core.resource.*
 import org.metaborg.spoofax.core.Spoofax
 import org.metaborg.spoofax.core.build.ISpoofaxBuilder
 import java.io.File
+import javax.inject.Inject
 
 fun TaskContainer.registerSpoofaxBuildTask(spoofaxProject: IProject, spoofax: Spoofax, name: String = "spoofaxBuild") =
   register(name, SpoofaxBuildTask::class.java, spoofaxProject, spoofax.resourceService, spoofax.dependencyService, spoofax.languagePathService, spoofax.builder)
 
-open class SpoofaxBuildTask(
+open class SpoofaxBuildTask @Inject constructor(
   private val spoofaxProject: IProject,
   private val resourceService: IResourceService,
   private val dependencyService: IDependencyService,

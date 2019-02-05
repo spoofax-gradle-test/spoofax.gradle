@@ -8,11 +8,12 @@ import org.metaborg.core.language.ILanguageService
 import org.metaborg.core.project.IProject
 import org.metaborg.spoofax.core.Spoofax
 import org.metaborg.spoofax.core.build.ISpoofaxBuilder
+import javax.inject.Inject
 
 fun TaskContainer.registerSpoofaxCleanTask(spoofaxProject: IProject, spoofax: Spoofax, name: String = "spoofaxClean") =
   register(name, SpoofaxCleanTask::class.java, spoofaxProject, spoofax.languageService, spoofax.builder)
 
-open class SpoofaxCleanTask(
+open class SpoofaxCleanTask @Inject constructor(
   private val spoofaxProject: IProject,
   private val languageService: ILanguageService,
   private val builder: ISpoofaxBuilder

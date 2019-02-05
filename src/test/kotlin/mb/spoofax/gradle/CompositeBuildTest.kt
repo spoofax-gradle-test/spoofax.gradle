@@ -3,27 +3,37 @@ package mb.spoofax.gradle
 import io.github.glytching.junit.extension.folder.TemporaryFolder
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.TaskOutcome
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
-import java.io.File
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CompositeBuildTest {
   @Test
   @ExtendWith(TemporaryFolderExtension::class)
   fun compositeBuildTest(tempDir: TemporaryFolder) {
+    // Root
     tempDir.createFile("settings.gradle.kts").apply {
       writeText("""
         rootProject.name = "compositeBuildTest"
 
         includeBuild("calc")
-        includeBuild("sdf")
-        includeBuild("stratego")
+        includeBuild("calc.lib")
       """.trimIndent())
     }
-    tempDir.createFile("build.gradle.kts")
+    tempDir.createFile("build.gradle.kts").apply {
+      writeText("""
+        tasks {
+          register("buildAll") {
+            dependsOn(gradle.includedBuilds.map { it.task(":build") })
+          }
+        }
+      """.trimIndent())
+    }
 
+    // calc language
     val calcDir = tempDir.createDirectory("calc")
     calcDir.resolve("build.gradle.kts").apply {
       createNewFile()
@@ -31,35 +41,68 @@ class CompositeBuildTest {
         plugins {
           id("org.metaborg.spoofax.gradle.langspec")
         }
+
+        group = "org.metaborg"
+        version = "0.1.0"
+
+        spoofax {
+          compileLanguage("org.metaborg", "org.metaborg.meta.lang.esv", metaborgVersion)
+          compileLanguage("org.metaborg", "org.metaborg.meta.lang.template", metaborgVersion)
+          sourceLanguage("org.metaborg", "meta.lib.spoofax", metaborgVersion)
+        }
       """.trimIndent())
     }
-    val sdfDir = tempDir.createDirectory("sdf")
-    sdfDir.resolve("build.gradle.kts").apply {
+    calcDir.resolve("metaborg.yaml").apply {
+      createNewFile()
+      writeText("""
+        ---
+        id: org.metaborg:calc:0.1.0
+        name: calc
+        dependencies:
+          compile:
+          - org.metaborg:org.metaborg.meta.lang.esv:${'$'}{metaborgVersion}
+          - org.metaborg:org.metaborg.meta.lang.template:${'$'}{metaborgVersion}
+          source:
+          - org.metaborg:meta.lib.spoofax:${'$'}{metaborgVersion}
+        pardonedLanguages:
+        - EditorService
+        - Stratego-Sugar
+        - SDF
+      """.trimIndent())
+    }
+
+    // calc.lib 'language'
+    val calcLib = tempDir.createDirectory("calc.lib")
+    calcLib.resolve("build.gradle.kts").apply {
       createNewFile()
       writeText("""
         plugins {
           id("org.metaborg.spoofax.gradle.langspec")
         }
-      """.trimIndent())
-    }
-    val strategoDir = tempDir.createDirectory("stratego")
-    strategoDir.resolve("build.gradle.kts").apply {
-      createNewFile()
-      writeText("""
-        plugins {
-          id("org.metaborg.spoofax.gradle.langspec")
+
+        group = "org.metaborg"
+        version = "0.1.0"
+
+        spoofax {
         }
       """.trimIndent())
     }
+    calcLib.resolve("metaborg.yaml").apply {
+      createNewFile()
+      writeText("""
+        ---
+        id: org.metaborg:calc.lib:0.1.0
+        name: calc.lib
+      """.trimIndent())
+    }
 
-    // TODO: create settings.gradle.kts, which includes all builds.
-    // TODO: create lang project, with examples and tests, compile dep on metalang SDF and Stratego.
-    // TODO: create metalang SDF project, generates Stratego, source dep on Stratego.
-    // TODO: create metalang Stratego project.
-
-    GradleRunner.create()
+    val result = GradleRunner.create()
       .withPluginClasspath()
       .withProjectDir(tempDir.root)
+      .withArguments("--info", "--stacktrace", "buildAll")
+      .forwardOutput()
       .build()
+
+    assertEquals(TaskOutcome.SUCCESS, result.task(":calc:spoofaxLoadLanguages")?.outcome)
   }
 }

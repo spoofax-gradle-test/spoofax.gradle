@@ -30,6 +30,7 @@ class SpoofaxGradleLanguageSpecConfigService @Inject constructor(
 
     val override = overrides[configFile]
     if(override != null) {
+      println("Overriding configuration for $configFile with $override")
       val identifier = run {
         val identifier = languageSpecConfig.identifier()
         LanguageIdentifier(override.groupId ?: identifier.groupId, override.id ?: identifier.id, override.version
@@ -66,4 +67,8 @@ data class ConfigOverride(
   val compileDeps: Collection<LanguageIdentifier> = mutableListOf(),
   val sourceDeps: Collection<LanguageIdentifier> = mutableListOf(),
   val javaDeps: Collection<LanguageIdentifier> = mutableListOf()
-)
+) {
+  override fun toString(): String {
+    return "ConfigOverride(groupId=$groupId, id=$id, version=$version, metaborgVersion=$metaborgVersion, compileDeps=$compileDeps, sourceDeps=$sourceDeps, javaDeps=$javaDeps)"
+  }
+}
