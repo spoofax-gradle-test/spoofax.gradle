@@ -247,7 +247,7 @@ open class SpoofaxExtension(private val project: Project) {
   private val compileLanguageConfig = project.compileLanguageConfig
 
   fun compileLanguage(group: String, name: String, version: String): Dependency {
-    val dependency = project.dependencies.create(group, name, version, SpoofaxBasePlugin.language)
+    val dependency = project.dependencies.create(group, name, version)
     compileLanguageConfig.dependencies.add(dependency)
     return dependency
   }
@@ -261,7 +261,7 @@ open class SpoofaxExtension(private val project: Project) {
   private val sourceLanguageConfig = project.sourceLanguageConfig
 
   fun sourceLanguage(group: String, name: String, version: String): Dependency {
-    val dependency = project.dependencies.create(group, name, version, SpoofaxBasePlugin.language)
+    val dependency = project.dependencies.create(group, name, version)
     sourceLanguageConfig.dependencies.add(dependency)
     return dependency
   }
