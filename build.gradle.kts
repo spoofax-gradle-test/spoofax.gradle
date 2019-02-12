@@ -28,5 +28,5 @@ gradlePlugin {
 }
 
 tasks.withType<Test> {
-  useJUnitPlatform {}
+  //useJUnitPlatform {}
 }

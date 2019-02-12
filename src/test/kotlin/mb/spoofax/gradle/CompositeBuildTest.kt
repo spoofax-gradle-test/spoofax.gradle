@@ -96,13 +96,11 @@ class CompositeBuildTest {
       """.trimIndent())
     }
 
-    val result = GradleRunner.create()
+    GradleRunner.create()
       .withPluginClasspath()
       .withProjectDir(tempDir.root)
       .withArguments("--info", "--stacktrace", "buildAll")
       .forwardOutput()
-      .buildAndFail()
-
-    //assertEquals(TaskOutcome.SUCCESS, result.task(":calc:spoofaxLoadLanguages")?.outcome)
+      .build()
   }
 }

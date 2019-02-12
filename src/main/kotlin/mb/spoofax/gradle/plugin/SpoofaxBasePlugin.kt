@@ -9,8 +9,6 @@ open class SpoofaxBasePlugin : Plugin<Project> {
     const val sourceLanguageConfig = "spoofaxSourceLanguage"
     const val languageConfig = "spoofaxLanguage"
 
-    const val archiveConfig = "default"
-
     const val spoofaxLanguageExtension = "spoofax-language"
 
     const val defaultMetaborgGroup = "org.metaborg"

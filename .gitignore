@@ -12,3 +12,7 @@
 **/.classpath
 **/.factorypath
 **/bin
+
+# Spoofax
+**/src-gen
+**/target
