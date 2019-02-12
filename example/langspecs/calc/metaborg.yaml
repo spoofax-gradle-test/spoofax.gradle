@@ -1,0 +1,7 @@
+---
+id: org.metaborg:calc:0.1.0
+name: calc
+pardonedLanguages:
+  - EditorService
+  - Stratego-Sugar
+  - SDF

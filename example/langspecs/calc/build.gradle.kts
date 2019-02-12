@@ -1,13 +1,15 @@
 plugins {
+  id("org.metaborg.gradle.config.root-project") version "0.5.0"
   id("org.metaborg.spoofax.gradle.langspec") version("develop-SNAPSHOT")
 }
 
-group = "org.metaborg"
 version = "develop-SNAPSHOT"
 
-//spoofax {
-//  compileLanguage("org.metaborg", "org.metaborg.meta.lang.esv", metaborgVersion)
-//  compileLanguage("org.metaborg", "org.metaborg.meta.lang.template", metaborgVersion)
-//  sourceLanguage("org.metaborg", "meta.lib.spoofax", metaborgVersion)
-//}
-
+spoofax {
+  addCompileLanguageDep("org.metaborg", "org.metaborg.meta.lang.esv", metaborgVersion)
+  addCompileLanguageDep("org.metaborg", "org.metaborg.meta.lang.template", metaborgVersion)
+  addCompileLanguageDep("org.metaborg", "org.metaborg.meta.lang.stratego", metaborgVersion)
+  addSourceLanguageDep("org.metaborg", "meta.lib.spoofax", metaborgVersion)
+  addSourceLanguageDep("org.metaborg", "spoofax.gradle.example.calc.lib", "develop-SNAPSHOT")
+  addSpoofaxCoreDep()
+}

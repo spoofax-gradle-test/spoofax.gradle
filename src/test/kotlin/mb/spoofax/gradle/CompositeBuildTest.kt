@@ -46,9 +46,9 @@ class CompositeBuildTest {
         version = "0.1.0"
 
         spoofax {
-          compileLanguage("org.metaborg", "org.metaborg.meta.lang.esv", metaborgVersion)
-          compileLanguage("org.metaborg", "org.metaborg.meta.lang.template", metaborgVersion)
-          sourceLanguage("org.metaborg", "meta.lib.spoofax", metaborgVersion)
+          addCompileLanguageDep("org.metaborg", "org.metaborg.meta.lang.esv", metaborgVersion)
+          addCompileLanguageDep("org.metaborg", "org.metaborg.meta.lang.template", metaborgVersion)
+          addSourceLanguageDep("org.metaborg", "meta.lib.spoofax", metaborgVersion)
         }
       """.trimIndent())
     }

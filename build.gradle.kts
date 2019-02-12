@@ -8,7 +8,7 @@ plugins {
 }
 
 dependencies {
-  compile("org.metaborg:org.metaborg.spoofax.meta.core:2.5.1")
+  compile("org.metaborg:org.metaborg.spoofax.meta.core:2.6.0-SNAPSHOT")
 
   testCompile("org.junit.jupiter:junit-jupiter-api:5.3.1")
   testCompile("io.github.glytching:junit-extensions:2.3.0")

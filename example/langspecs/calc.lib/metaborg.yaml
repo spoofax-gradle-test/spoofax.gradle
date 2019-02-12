@@ -1,0 +1,6 @@
+---
+id: org.metaborg:calc.lib:0.1.0
+name: calc.lib
+pardonedLanguages:
+  - EditorService
+  - Stratego-Sugar
