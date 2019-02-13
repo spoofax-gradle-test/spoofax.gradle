@@ -8,7 +8,6 @@ version = "develop-SNAPSHOT"
 spoofax {
   addCompileLanguageDep("org.metaborg", "org.metaborg.meta.lang.esv", metaborgVersion)
   addCompileLanguageDep("org.metaborg", "org.metaborg.meta.lang.template", metaborgVersion)
-  addCompileLanguageDep("org.metaborg", "org.metaborg.meta.lang.stratego", metaborgVersion)
   addSourceLanguageDep("org.metaborg", "meta.lib.spoofax", metaborgVersion)
   addSourceLanguageDep("org.metaborg", "spoofax.gradle.example.calc.lib", "develop-SNAPSHOT")
   addSpoofaxCoreDep()

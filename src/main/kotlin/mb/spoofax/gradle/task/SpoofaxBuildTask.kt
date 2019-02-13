@@ -30,6 +30,8 @@ open class SpoofaxBuildTask @Inject constructor(
   @TaskAction
   fun execute() {
     val inputBuilder = BuildInputBuilder(spoofaxProject)
+    inputBuilder.withSourcesFromDefaultSourceLocations(true)
+    inputBuilder.addTransformGoal(CompileGoal())
     val buildInput = inputBuilder.build(dependencyService, languagePathService)
     val output = builder.build(buildInput)
     output.allMessages().forEach { msg ->

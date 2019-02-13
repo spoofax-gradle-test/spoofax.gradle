@@ -7,6 +7,5 @@ version = "develop-SNAPSHOT"
 
 spoofax {
   addCompileLanguageDep("org.metaborg", "org.metaborg.meta.lang.esv", metaborgVersion)
-  addCompileLanguageDep("org.metaborg", "org.metaborg.meta.lang.stratego", metaborgVersion)
   addSpoofaxCoreDep()
 }

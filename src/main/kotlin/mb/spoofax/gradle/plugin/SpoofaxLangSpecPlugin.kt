@@ -11,6 +11,7 @@ import org.gradle.kotlin.dsl.*
 import org.metaborg.core.language.LanguageVersion
 import org.metaborg.core.project.ISimpleProjectService
 import org.metaborg.spoofax.core.Spoofax
+import org.metaborg.spoofax.meta.core.SpoofaxExtensionModule
 import org.metaborg.spoofax.meta.core.SpoofaxMeta
 import org.metaborg.spoofax.meta.core.build.LanguageSpecBuildInput
 import org.metaborg.spoofax.meta.core.build.SpoofaxLangSpecCommonPaths
@@ -39,7 +40,7 @@ class SpoofaxLangSpecPlugin : Plugin<Project> {
     System.setProperty("apple.awt.UIElement", "true")
 
     // Create Spoofax and SpoofaxMeta instance.
-    val spoofax = Spoofax()
+    val spoofax = Spoofax(SpoofaxExtensionModule())
     val resourceSrv = spoofax.resourceService
     val spoofaxMeta = SpoofaxMeta(spoofax, SpoofaxGradleMetaModule())
 
