@@ -1,6 +1,7 @@
 plugins {
   id("org.metaborg.gradle.config.root-project") version "0.5.0"
-  id("org.metaborg.spoofax.gradle.langspec") version ("develop-SNAPSHOT")
+  id("org.metaborg.spoofax.gradle.langspec") version "develop-SNAPSHOT"
+  id("de.set.ecj") version "1.4.1" // Use ECJ to speed up compilation of Stratego's generated Java files.
 }
 
 version = "develop-SNAPSHOT"
@@ -15,7 +16,9 @@ spoofax {
   addSourceLanguageDep("org.metaborg", "org.metaborg.meta.nabl2.shared", metaborgVersion)
   addSourceLanguageDep("org.metaborg", "org.metaborg.meta.nabl2.runtime", metaborgVersion)
 
-  addSourceLanguageDep("org.metaborg", "spoofax.gradle.example.calc.lib", "develop-SNAPSHOT")
-
   addSpoofaxCoreDep()
+
+  dependencies {
+    api("org.metaborg:org.metaborg.meta.lang.dynsem.interpreter:$metaborgVersion")
+  }
 }
