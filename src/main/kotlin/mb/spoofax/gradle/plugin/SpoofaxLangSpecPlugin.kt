@@ -7,6 +7,8 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.plugins.*
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.*
 import org.metaborg.core.language.LanguageVersion
 import org.metaborg.core.project.ISimpleProjectService
@@ -35,12 +37,22 @@ class SpoofaxLangSpecPlugin : Plugin<Project> {
     val languageConfig = project.languageConfig
     val javaApiConfig = project.configurations.getByName(JavaPlugin.API_CONFIGURATION_NAME)
 
+    // Configure Java source directories.
+    project.configure<SourceSetContainer> {
+      val mainSourceSet = getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+      mainSourceSet.java {
+        srcDir("src/main/strategies")
+        srcDir("src-gen/stratego-java")
+        srcDir("src-gen/ds-java")
+      }
+    }
+
     // Sets the 'java.awt.headless' and 'apple.awt.UIElement' properties to true, to prevent an application icon from appearing on some platforms.
     System.setProperty("java.awt.headless", "true")
     System.setProperty("apple.awt.UIElement", "true")
 
     // Create Spoofax and SpoofaxMeta instance.
-    val spoofax = Spoofax(SpoofaxExtensionModule())
+    val spoofax = Spoofax(SpoofaxGradleModule(), SpoofaxExtensionModule())
     val resourceSrv = spoofax.resourceService
     val spoofaxMeta = SpoofaxMeta(spoofax, SpoofaxGradleMetaModule())
 
@@ -64,8 +76,7 @@ class SpoofaxLangSpecPlugin : Plugin<Project> {
 
     // Create Spoofax language specification project.
     val projectService = spoofax.projectService as ISimpleProjectService
-    val spoofaxProject = projectService.create(projectLoc)
-    val langSpecProject = spoofaxMeta.languageSpecService.get(spoofaxProject)
+    val langSpecProject = spoofaxMeta.languageSpecService.get(projectService.create(projectLoc))
       ?: throw GradleException("Project at $projectDir is not a Spoofax language specification project")
     val langSpecPaths = SpoofaxLangSpecCommonPaths(projectLoc)
 
@@ -110,7 +121,7 @@ class SpoofaxLangSpecPlugin : Plugin<Project> {
     val loadLanguagesTask = project.tasks.registerLoadLanguagesTask(languageConfig, spoofax)
 
     // Build tasks.
-    val buildTask = project.tasks.registerSpoofaxBuildTask(spoofaxProject, spoofax)
+    val buildTask = project.tasks.registerSpoofaxBuildTask(langSpecProject, spoofax)
     buildTask.configure {
       dependsOn(loadLanguagesTask)
     }
@@ -156,7 +167,7 @@ class SpoofaxLangSpecPlugin : Plugin<Project> {
 
 
     // Clean tasks.
-    val spoofaxCleanTask = project.tasks.registerSpoofaxCleanTask(spoofaxProject, spoofax)
+    val spoofaxCleanTask = project.tasks.registerSpoofaxCleanTask(langSpecProject, spoofax)
     spoofaxCleanTask.configure {
       dependsOn(loadLanguagesTask) // TODO: only depends on compile languages
     }
