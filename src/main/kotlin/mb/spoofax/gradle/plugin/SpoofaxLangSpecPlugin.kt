@@ -212,7 +212,10 @@ class SpoofaxLangSpecPlugin : Plugin<Project> {
     buildExamplesTask.configure {
       dependsOn(loadCompiledLanguageTask)
       // No inputs/outputs known: always execute.
+      // Only build files of compiled language.
       addLanguage(langSpecProject.config().identifier())
+      // Only execute task if buildExamples is set to true.
+      onlyIf { extension.buildExamples }
     }
     checkTask.dependsOn(buildExamplesTask)
 
@@ -287,6 +290,7 @@ open class SpoofaxExtension(private val project: Project) {
   var metaborgGroup: String = "org.metaborg"
   var metaborgVersion: String = "2.6.0-SNAPSHOT"
   var createPublication: Boolean = true
+  var buildExamples: Boolean = false
 
 
   private val compileLanguageConfig = project.compileLanguageConfig
