@@ -11,6 +11,7 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.*
 import org.gradle.language.base.plugins.LifecycleBasePlugin
+import org.metaborg.core.language.ILanguageImpl
 import org.metaborg.core.language.LanguageVersion
 import org.metaborg.core.project.ISimpleProjectService
 import org.metaborg.spoofax.core.Spoofax
@@ -130,10 +131,13 @@ class SpoofaxLangSpecPlugin : Plugin<Project> {
 
 
     // Build tasks.
-    val buildTask = project.tasks.registerSpoofaxBuildTask(langSpecProject, langSpecProject.config().pardonedLanguages(), spoofax)
+    val buildTask = project.tasks.registerSpoofaxBuildTask(spoofax, langSpecProject)
     buildTask.configure {
       dependsOn(loadLanguagesTask)
       // No inputs/outputs known: always execute.
+      langSpecProject.config().pardonedLanguages().forEach {
+        addPardonedLanguage(it)
+      }
     }
 
     val metaBuilder = spoofaxMeta.metaBuilder
@@ -175,7 +179,6 @@ class SpoofaxLangSpecPlugin : Plugin<Project> {
     val assembleTask = project.tasks.getByName(LifecycleBasePlugin.ASSEMBLE_TASK_NAME)
     assembleTask.dependsOn(langSpecArchiveTask)
 
-
     val loadCompiledLanguageTask = project.tasks.register("spoofaxLoadCompiledLanguage") {
       dependsOn(langSpecArchiveTask)
       inputs.file(archiveFile)
@@ -204,8 +207,14 @@ class SpoofaxLangSpecPlugin : Plugin<Project> {
     cleanTask.dependsOn(langSpecCleanTask)
 
 
-    // TODO: build examples tasks.
-
+    // Build examples tasks.
+    val buildExamplesTask = project.tasks.registerSpoofaxBuildTask(spoofax, langSpecProject, "spoofaxBuildExamples")
+    buildExamplesTask.configure {
+      dependsOn(loadCompiledLanguageTask)
+      // No inputs/outputs known: always execute.
+      addLanguage(langSpecProject.config().identifier())
+    }
+    checkTask.dependsOn(buildExamplesTask)
 
     // TODO: SPT test tasks.
 //    val spoofaxTestTask = project.tasks.register("spoofaxTest") {
