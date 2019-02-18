@@ -17,7 +17,7 @@ fun Dependency.toSpoofaxDependency(): LanguageIdentifier {
   return LanguageIdentifier(group, name, spoofaxVersion)
 }
 
-fun LanguageIdentifier.toGradleDependency(project: Project, configuration: String? = null, classifier: String? = null, ext: String? = null): ExternalModuleDependency {
+fun LanguageIdentifier.toGradleDependency(project: Project, configuration: String? = Dependency.DEFAULT_CONFIGURATION, classifier: String? = null, ext: String? = null): ExternalModuleDependency {
   return project.dependencies.create(this.groupId, this.id, this.version.toString(), configuration, classifier, ext)
 }
 

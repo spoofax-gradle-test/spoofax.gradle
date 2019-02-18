@@ -69,6 +69,7 @@ open class SpoofaxBuildTask @Inject constructor(
 
   @TaskAction
   private fun execute() {
+    // TODO: can make this incremental based on changes in the project directory?
     val inputBuilder = BuildInputBuilder(spoofaxProject).run {
       if(!languageIds.isEmpty()) {
         withCompileDependencyLanguages(false)

@@ -11,22 +11,20 @@ import org.metaborg.core.resource.IResourceService
 import org.metaborg.spoofax.core.Spoofax
 import javax.inject.Inject
 
-fun TaskContainer.registerLoadLanguagesTask(languageConfig: Configuration, spoofax: Spoofax, name: String = "spoofaxLoadLanguages") =
-  register(name, LoadLanguagesTask::class.java, languageConfig, spoofax.resourceService, spoofax.languageDiscoveryService)
+fun TaskContainer.registerLoadLanguagesTask(spoofax: Spoofax, languageConfig: Configuration, name: String = "spoofaxLoadLanguages") =
+  register(name, LoadLanguagesTask::class.java, spoofax.resourceService, spoofax.languageDiscoveryService, languageConfig)
 
 open class LoadLanguagesTask @Inject constructor(
-  private val languageConfig: Configuration,
   private val resourceService: IResourceService,
-  private val languageDiscoveryService: ILanguageDiscoveryService
+  private val languageDiscoveryService: ILanguageDiscoveryService,
+  private val languageConfig: Configuration
 ) : DefaultTask() {
   init {
     dependsOn(languageConfig)
   }
 
-
   @InputFiles
   fun languageConfigFiles(): FileCollection = languageConfig
-
 
   @TaskAction
   fun execute() {

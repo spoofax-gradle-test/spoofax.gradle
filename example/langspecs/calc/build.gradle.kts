@@ -7,6 +7,8 @@ plugins {
 version = "develop-SNAPSHOT"
 
 spoofax {
+  buildExamples = true
+
   addCompileLanguageDep("org.metaborg", "org.metaborg.meta.lang.esv", metaborgVersion)
   addCompileLanguageDep("org.metaborg", "org.metaborg.meta.lang.template", metaborgVersion)
   addCompileLanguageDep("org.metaborg", "org.metaborg.meta.nabl2.lang", metaborgVersion)
