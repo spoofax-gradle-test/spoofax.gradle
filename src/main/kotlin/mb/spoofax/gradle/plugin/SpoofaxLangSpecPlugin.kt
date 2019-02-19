@@ -375,8 +375,8 @@ class SpoofaxLangSpecPlugin : Plugin<Project> {
 
 @Suppress("unused")
 open class SpoofaxExtension(private val project: Project) {
-  var metaborgGroup: String = "org.metaborg"
-  var metaborgVersion: String = "2.6.0-SNAPSHOT"
+  var metaborgGroup: String = SpoofaxBasePlugin.defaultMetaborgGroup
+  var metaborgVersion: String = SpoofaxBasePlugin.defaultMetaborgVersion
   var createPublication: Boolean = true
   var buildExamples: Boolean = false
   var runTests: Boolean = true
